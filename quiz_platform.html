@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>QuizCraft</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --teal:#0eb5a0;--teal-dark:#0a8f7d;--teal-light:#e0f7f4;--teal-mid:#5dd5c5;
+    --orange:#ff8c42;--banana:#f7c948;--bg:#d9f5f1;--white:#fff;
+    --text:#1a2e2a;--text-muted:#5a7a75;--card:#fff;--radius:16px;
+    --shadow:0 4px 24px rgba(14,181,160,0.13);
+    --dot-color:rgba(14,181,160,0.18);
+  }
+  body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;position:relative}
+  body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,var(--dot-color) 1.5px,transparent 1.5px);background-size:28px 28px;z-index:0;pointer-events:none}
+  #app{position:relative;z-index:1;min-height:100vh}
+
+  /* NAV */
+  nav{background:var(--white);box-shadow:0 2px 16px rgba(14,181,160,0.10);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100}
+  .nav-brand{font-family:'Poppins',sans-serif;font-weight:800;font-size:1.4rem;color:var(--teal);letter-spacing:-0.5px;display:flex;align-items:center;gap:8px;cursor:pointer}
+  .nav-brand span{color:var(--orange)}
+  .nav-actions{display:flex;gap:10px;align-items:center}
+  .nav-user{font-size:0.85rem;color:var(--text-muted);font-weight:600}
+  
+  /* BUTTONS */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 22px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.92rem;cursor:pointer;border:none;transition:all .18s ease;letter-spacing:0.2px}
+  .btn-primary{background:var(--teal);color:#fff}
+  .btn-primary:hover{background:var(--teal-dark);transform:translateY(-1px)}
+  .btn-secondary{background:var(--white);color:var(--teal);border:2px solid var(--teal)}
+  .btn-secondary:hover{background:var(--teal-light);transform:translateY(-1px)}
+  .btn-orange{background:var(--orange);color:#fff}
+  .btn-orange:hover{background:#e07835;transform:translateY(-1px)}
+  .btn-ghost{background:transparent;color:var(--text-muted);border:2px solid #cde9e5}
+  .btn-ghost:hover{background:var(--teal-light);color:var(--teal)}
+  .btn-sm{padding:7px 16px;font-size:0.82rem}
+  .btn-lg{padding:14px 32px;font-size:1.05rem}
+  .btn:disabled{opacity:0.5;cursor:not-allowed;transform:none!important}
+
+  /* CARD */
+  .card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:2rem}
+  
+  /* PAGES */
+  .page{max-width:900px;margin:0 auto;padding:2rem 1.2rem}
+  
+  /* HOME */
+  .hero{text-align:center;padding:3rem 1rem 2rem}
+  .hero-title{font-family:'Poppins',sans-serif;font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.15;color:var(--text);margin-bottom:1rem}
+  .hero-title em{color:var(--teal);font-style:normal}
+  .hero-sub{color:var(--text-muted);font-size:1.05rem;margin-bottom:2.5rem;line-height:1.6}
+  .hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .deco-shapes{position:relative;height:120px;margin:1.5rem 0}
+  .shape{position:absolute;border-radius:50%}
+  
+  .feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.2rem;margin-top:2rem}
+  .feature-card{background:var(--white);border-radius:var(--radius);padding:1.4rem;box-shadow:var(--shadow);text-align:center}
+  .feature-icon{font-size:2rem;margin-bottom:0.7rem}
+  .feature-card h3{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:0.3rem}
+  .feature-card p{font-size:0.82rem;color:var(--text-muted);line-height:1.5}
+
+  /* QUIZ LIST */
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+  .section-title{font-family:'Poppins',sans-serif;font-weight:700;font-size:1.4rem;color:var(--text)}
+  .quiz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.2rem}
+  .quiz-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:1.4rem;cursor:pointer;transition:all .18s;border:2px solid transparent;position:relative;overflow:hidden}
+  .quiz-card::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--teal),var(--teal-mid))}
+  .quiz-card:hover{transform:translateY(-3px);border-color:var(--teal-mid)}
+  .quiz-card-title{font-weight:800;font-size:1.05rem;color:var(--text);margin-bottom:0.5rem;margin-top:0.3rem}
+  .quiz-card-meta{font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem}
+  .quiz-badge{display:inline-block;background:var(--teal-light);color:var(--teal-dark);font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:50px;margin-bottom:0.6rem}
+  .empty-state{text-align:center;padding:4rem 2rem;color:var(--text-muted)}
+  .empty-icon{font-size:3rem;margin-bottom:1rem;opacity:0.5}
+
+  /* AUTH */
+  .auth-wrap{max-width:420px;margin:3rem auto}
+  .auth-tabs{display:flex;background:#edf7f5;border-radius:50px;padding:4px;margin-bottom:1.5rem}
+  .auth-tab{flex:1;padding:8px;text-align:center;border-radius:50px;font-weight:700;font-size:0.88rem;cursor:pointer;transition:all .18s;color:var(--text-muted)}
+  .auth-tab.active{background:var(--teal);color:#fff}
+  .form-group{margin-bottom:1.2rem}
+  .form-group label{display:block;font-weight:700;font-size:0.88rem;color:var(--text);margin-bottom:6px}
+  .form-group input,.form-group select,.form-group textarea{width:100%;padding:11px 14px;border:2px solid #cde9e5;border-radius:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;color:var(--text);background:var(--white);transition:border-color .15s;outline:none}
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--teal)}
+  .form-group textarea{resize:vertical;min-height:80px}
+  .error-msg{color:#e05050;font-size:0.82rem;margin-top:5px;font-weight:600}
+
+  /* QUIZ CREATION */
+  .question-block{background:var(--teal-light);border-radius:var(--radius);padding:1.4rem;margin-bottom:1.2rem;border:2px solid rgba(14,181,160,0.2)}
+  .q-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+  .q-label{font-weight:800;color:var(--teal-dark);font-size:0.9rem}
+  .options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:0.8rem}
+  .option-row{display:flex;align-items:center;gap:8px}
+  .option-letter{width:28px;height:28px;border-radius:50%;background:var(--teal);color:#fff;font-weight:800;font-size:0.8rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .option-row input[type=text]{flex:1;padding:8px 12px;border:2px solid #cde9e5;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none}
+  .option-row input:focus{border-color:var(--teal)}
+  .correct-select{margin-top:0.8rem;display:flex;align-items:center;gap:8px;font-size:0.85rem;font-weight:700;color:var(--text-muted)}
+  .correct-select select{padding:6px 10px;border:2px solid #cde9e5;border-radius:8px;font-family:'Nunito',sans-serif;font-size:0.85rem;outline:none}
+  .correct-select select:focus{border-color:var(--teal)}
+
+  /* QUIZ TAKING */
+  .progress-wrap{margin-bottom:1.5rem}
+  .progress-text{display:flex;justify-content:space-between;font-size:0.82rem;font-weight:700;color:var(--text-muted);margin-bottom:6px}
+  .progress-bar{height:8px;background:#cde9e5;border-radius:50px;overflow:hidden}
+  .progress-fill{height:100%;background:var(--teal);border-radius:50px;transition:width .4s ease}
+  .question-title{font-family:'Poppins',sans-serif;font-weight:700;font-size:1.15rem;color:var(--text);margin-bottom:1.8rem;line-height:1.5;text-transform:uppercase;text-align:center}
+  .options-list{display:flex;flex-direction:column;gap:12px}
+  .option-btn{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:14px;border:2px solid #cde9e5;background:var(--white);cursor:pointer;transition:all .15s;width:100%;text-align:left;font-family:'Nunito',sans-serif;font-weight:600;font-size:0.95rem;color:var(--text)}
+  .option-btn:hover:not(:disabled){border-color:var(--teal);background:var(--teal-light)}
+  .option-btn.selected{border-color:var(--teal);background:var(--teal);color:#fff}
+  .option-btn.selected .opt-badge{background:rgba(255,255,255,0.25);color:#fff}
+  .option-btn.correct{border-color:#22c55e;background:#22c55e;color:#fff}
+  .option-btn.wrong{border-color:#ef4444;background:#ef4444;color:#fff}
+  .option-btn:disabled{cursor:default}
+  .opt-badge{width:32px;height:32px;border-radius:50%;background:var(--teal-light);color:var(--teal-dark);font-weight:800;font-size:0.82rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .feedback-bar{border-radius:12px;padding:12px 18px;margin-top:1.2rem;font-weight:700;font-size:0.92rem;text-align:center}
+  .feedback-bar.correct{background:#dcfce7;color:#166534}
+  .feedback-bar.wrong{background:#fee2e2;color:#991b1b}
+  .quiz-nav{display:flex;justify-content:flex-end;margin-top:1.5rem}
+
+  /* RESULTS */
+  .score-circle{width:140px;height:140px;border-radius:50%;border:8px solid var(--teal);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1.5rem;position:relative}
+  .score-big{font-family:'Poppins',sans-serif;font-size:2.4rem;font-weight:800;color:var(--teal);line-height:1}
+  .score-label{font-size:0.78rem;color:var(--text-muted);font-weight:700}
+  .results-title{text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:1.3rem;margin-bottom:1.8rem}
+  .result-item{border-radius:12px;padding:1rem 1.2rem;margin-bottom:0.8rem;border:2px solid transparent}
+  .result-item.correct{background:#dcfce7;border-color:#86efac}
+  .result-item.wrong{background:#fee2e2;border-color:#fca5a5}
+  .result-q{font-weight:700;font-size:0.9rem;margin-bottom:0.4rem;text-transform:uppercase;font-size:0.82rem;opacity:0.8}
+  .result-ans{font-size:0.88rem;font-weight:600}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--teal);color:#fff;padding:10px 24px;border-radius:50px;font-weight:700;font-size:0.9rem;z-index:999;animation:toastIn .3s ease,toastOut .3s ease 2.2s forwards;pointer-events:none}
+  @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+  @keyframes toastOut{to{opacity:0;transform:translateX(-50%) translateY(20px)}}
+
+  /* RESPONSIVE */
+  @media(max-width:600px){
+    .options-grid{grid-template-columns:1fr}
+    nav{padding:0 1rem}
+    .page{padding:1.5rem 0.8rem}
+    .hero-title{font-size:1.7rem}
+    .hero-actions{flex-direction:column;align-items:center}
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+  .fade-up{animation:fadeUp .35s ease both}
+  @keyframes pop{0%{transform:scale(0.92)}60%{transform:scale(1.04)}100%{transform:scale(1)}}
+  .pop{animation:pop .3s ease}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ===== STATE =====
+let users = JSON.parse(localStorage.getItem('qc_users')||'[]');
+let quizzes = JSON.parse(localStorage.getItem('qc_quizzes')||'[]');
+let currentUser = JSON.parse(localStorage.getItem('qc_user')||'null');
+let view = 'home'; // home | auth | create | list | take | results
+let quizSession = null; // {quiz, answers:[], current:0}
+let sessionResults = null;
+let toast = null;
+let toastTimer = null;
+
+function save(){
+  localStorage.setItem('qc_users',JSON.stringify(users));
+  localStorage.setItem('qc_quizzes',JSON.stringify(quizzes));
+  localStorage.setItem('qc_user',JSON.stringify(currentUser));
+}
+
+function showToast(msg){
+  if(toastTimer)clearTimeout(toastTimer);
+  toast=msg; render();
+  toastTimer=setTimeout(()=>{toast=null;render();},2700);
+}
+
+// ===== AUTH =====
+let authMode='login';
+let authData={username:'',password:'',name:''};
+let authErr='';
+
+function doLogin(){
+  if(!authData.username||!authData.password){authErr='Fill all fields';render();return;}
+  const u=users.find(u=>u.username===authData.username&&u.password===authData.password);
+  if(!u){authErr='Invalid credentials';render();return;}
+  currentUser=u;save();authErr='';view='home';showToast('Welcome back, '+u.name+'!');
+}
+function doRegister(){
+  if(!authData.name||!authData.username||!authData.password){authErr='Fill all fields';render();return;}
+  if(users.find(u=>u.username===authData.username)){authErr='Username taken';render();return;}
+  const u={id:Date.now(),name:authData.name,username:authData.username,password:authData.password};
+  users.push(u);currentUser=u;save();authErr='';view='home';showToast('Welcome, '+u.name+'! 🎉');
+}
+function doLogout(){currentUser=null;save();view='home';render();}
+
+// ===== QUIZ CREATION =====
+let creationData={title:'',category:'',questions:[{text:'',options:['','','',''],correct:0}]};
+let creationErr='';
+
+function addQuestion(){
+  creationData.questions.push({text:'',options:['','','',''],correct:0});render();
+}
+function removeQuestion(i){
+  if(creationData.questions.length===1)return;
+  creationData.questions.splice(i,1);render();
+}
+function saveQuiz(){
+  if(!creationData.title.trim()){creationErr='Quiz needs a title';render();return;}
+  for(let q of creationData.questions){
+    if(!q.text.trim()){creationErr='All questions need text';render();return;}
+    if(q.options.some(o=>!o.trim())){creationErr='All options must be filled';render();return;}
+  }
+  const quiz={
+    id:Date.now(),title:creationData.title.trim(),category:creationData.category||'General',
+    author:currentUser.name,authorId:currentUser.id,
+    questions:creationData.questions.map(q=>({...q,options:[...q.options]})),
+    createdAt:new Date().toLocaleDateString()
+  };
+  quizzes.push(quiz);save();
+  creationData={title:'',category:'',questions:[{text:'',options:['','','',''],correct:0}]};
+  creationErr='';view='list';showToast('Quiz published! 🚀');
+}
+
+// ===== QUIZ TAKING =====
+function startQuiz(quiz){
+  if(!currentUser){view='auth';authMode='login';render();return;}
+  quizSession={quiz,answers:[],current:0,revealed:false};view='take';render();
+}
+function selectAnswer(i){
+  if(quizSession.revealed)return;
+  quizSession.selectedIdx=i;render();
+}
+function confirmAnswer(){
+  if(quizSession.selectedIdx===undefined)return;
+  quizSession.answers[quizSession.current]=quizSession.selectedIdx;
+  quizSession.revealed=true;render();
+}
+function nextQuestion(){
+  if(quizSession.current<quizSession.quiz.questions.length-1){
+    quizSession.current++;quizSession.selectedIdx=undefined;quizSession.revealed=false;render();
+  } else {
+    // show results
+    let score=0;
+    quizSession.quiz.questions.forEach((q,i)=>{if(quizSession.answers[i]===q.correct)score++;});
+    sessionResults={quiz:quizSession.quiz,answers:quizSession.answers,score,total:quizSession.quiz.questions.length};
+    view='results';render();
+  }
+}
+
+// ===== RENDER =====
+const LETTERS=['A','B','C','D'];
+const CATEGORIES=['General','Science','History','Sports','Tech','Pop Culture','Geography','Math'];
+
+function el(tag,attrs,children){
+  const e=document.createElement(tag);
+  if(attrs)Object.entries(attrs).forEach(([k,v])=>{
+    if(k==='class')e.className=v;
+    else if(k.startsWith('on'))e.addEventListener(k.slice(2).toLowerCase(),v);
+    else if(k==='html')e.innerHTML=v;
+    else e.setAttribute(k,v);
+  });
+  if(children)children.forEach(c=>{if(c)e.appendChild(typeof c==='string'?document.createTextNode(c):c)});
+  return e;
+}
+function t(text){return document.createTextNode(text)}
+
+function renderNav(){
+  const nav=el('nav',{});
+  const brand=el('div',{class:'nav-brand',onClick:()=>{view='home';render()}},[]);
+  brand.innerHTML=`<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="11" fill="#0eb5a0"/><text x="12" y="16.5" text-anchor="middle" font-size="13" font-weight="900" fill="white" font-family="Nunito,sans-serif">Q</text></svg>`;
+  brand.append(el('span',{},['Quiz']),el('span',{html:'<span style="color:var(--orange)">Craft</span>'}));
+  nav.appendChild(brand);
+  const actions=el('div',{class:'nav-actions'},[]);
+  if(currentUser){
+    actions.appendChild(el('span',{class:'nav-user'},['Hi, '+currentUser.name]));
+    actions.appendChild(mkBtn('Log Out','btn btn-ghost btn-sm',doLogout));
+  } else {
+    actions.appendChild(mkBtn('Sign In','btn btn-secondary btn-sm',()=>{view='auth';authMode='login';render()}));
+  }
+  nav.appendChild(actions);
+  return nav;
+}
+
+function mkBtn(label,cls,onClick,disabled=false){
+  const b=el('button',{class:cls,onClick},[label]);
+  if(disabled)b.disabled=true;
+  return b;
+}
+
+function renderHome(){
+  const page=el('div',{class:'page fade-up'},[]);
+  const hero=el('div',{class:'hero'},[]);
+  const title=el('h1',{class:'hero-title'});
+  title.innerHTML='Test Your Knowledge,<br><em>Challenge the World</em>';
+  const sub=el('p',{class:'hero-sub'},['Create custom quizzes or take quizzes made by others — learn, compete & have fun!']);
+  const actions=el('div',{class:'hero-actions'},[
+    mkBtn('✏️  Create a Quiz','btn btn-primary btn-lg',()=>{
+      if(!currentUser){view='auth';authMode='login';render();return;}
+      view='create';render();
+    }),
+    mkBtn('🎯  Take a Quiz','btn btn-secondary btn-lg',()=>{view='list';render()}),
+  ]);
+  hero.append(title,sub,actions);
+
+  // Decorative SVG
+  const deco=document.createElement('div');
+  deco.style.cssText='display:flex;justify-content:center;margin:1.5rem 0;gap:20px;flex-wrap:wrap';
+  deco.innerHTML=`
+    <svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="40" r="35" fill="#ff8c42" opacity=".85"/><text x="40" y="52" text-anchor="middle" font-size="32">🌿</text></svg>
+    <svg width="80" height="80" viewBox="0 0 80 80"><ellipse cx="40" cy="40" rx="30" ry="35" fill="#f7c948" opacity=".9"/><text x="40" y="52" text-anchor="middle" font-size="32">🍊</text></svg>
+    <svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="40" r="35" fill="#0eb5a0" opacity=".85"/><text x="40" y="52" text-anchor="middle" font-size="32">🏆</text></svg>
+    <svg width="80" height="80" viewBox="0 0 80 80"><ellipse cx="40" cy="40" rx="35" ry="28" fill="#f7c948" opacity=".9"/><text x="40" y="52" text-anchor="middle" font-size="32">🍌</text></svg>
+    <svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="40" r="30" fill="#ff8c42" opacity=".7"/><text x="40" y="52" text-anchor="middle" font-size="32">👟</text></svg>
+  `;
+  hero.appendChild(deco);
+  page.appendChild(hero);
+
+  // Features
+  const feats=[
+    {icon:'🛠️',title:'Create Quizzes',desc:'Build custom quizzes with multiple choice questions in minutes'},
+    {icon:'🧠',title:'Challenge Friends',desc:'Share your quizzes and let others test their knowledge'},
+    {icon:'📊',title:'Track Scores',desc:'Get instant results and see where you can improve'},
+    {icon:'📱',title:'Mobile Ready',desc:'Works beautifully on any device, anytime, anywhere'},
+  ];
+  const grid=el('div',{class:'feature-grid'},[]);
+  feats.forEach(f=>{
+    const card=el('div',{class:'feature-card'},[]);
+    card.innerHTML=`<div class="feature-icon">${f.icon}</div><h3>${f.title}</h3><p>${f.desc}</p>`;
+    grid.appendChild(card);
+  });
+  page.appendChild(grid);
+
+  if(quizzes.length>0){
+    const sec=el('div',{style:'margin-top:2.5rem'},[]);
+    const sh=el('div',{class:'section-header'},[
+      el('h2',{class:'section-title'},['Recent Quizzes']),
+      mkBtn('See All →','btn btn-ghost btn-sm',()=>{view='list';render()})
+    ]);
+    sec.appendChild(sh);
+    const qgrid=el('div',{class:'quiz-grid'},[]);
+    quizzes.slice(-3).reverse().forEach(quiz=>{
+      qgrid.appendChild(renderQuizCard(quiz));
+    });
+    sec.appendChild(qgrid);
+    page.appendChild(sec);
+  }
+  return page;
+}
+
+function renderQuizCard(quiz){
+  const card=el('div',{class:'quiz-card',onClick:()=>{startQuiz(quiz)}},[]);
+  card.innerHTML=`
+    <span class="quiz-badge">${quiz.category}</span>
+    <div class="quiz-card-title">${quiz.title}</div>
+    <div class="quiz-card-meta">📝 ${quiz.questions.length} questions &nbsp;·&nbsp; 👤 ${quiz.author} &nbsp;·&nbsp; 📅 ${quiz.createdAt}</div>
+  `;
+  const btn=mkBtn('Take Quiz →','btn btn-primary btn-sm',()=>startQuiz(quiz));
+  btn.style.width='100%';
+  card.appendChild(btn);
+  return card;
+}
+
+function renderAuth(){
+  const wrap=el('div',{class:'auth-wrap fade-up'},[]);
+  const tabs=el('div',{class:'auth-tabs'},[
+    Object.assign(el('div',{class:'auth-tab'+(authMode==='login'?' active':''),onClick:()=>{authMode='login';authErr='';render()}},['Sign In']),{}),
+    Object.assign(el('div',{class:'auth-tab'+(authMode==='register'?' active':''),onClick:()=>{authMode='register';authErr='';render()}},['Register']),{}),
+  ]);
+  const card=el('div',{class:'card'},[]);
+  card.appendChild(el('h2',{style:'font-family:Poppins,sans-serif;font-weight:700;font-size:1.3rem;margin-bottom:1.2rem;color:var(--text)'},[authMode==='login'?'Welcome back!':'Create an account']));
+
+  function inputGroup(label,key,type='text',placeholder=''){
+    const g=el('div',{class:'form-group'},[el('label',{},[label])]);
+    const inp=el('input',{type,placeholder});
+    inp.value=authData[key]||'';
+    inp.addEventListener('input',e=>{authData[key]=e.target.value;});
+    g.appendChild(inp);
+    return g;
+  }
+  if(authMode==='register')card.appendChild(inputGroup('Full Name','name','text','Your name'));
+  card.appendChild(inputGroup('Username','username','text','Enter username'));
+  card.appendChild(inputGroup('Password','password','password','Enter password'));
+  if(authErr)card.appendChild(el('p',{class:'error-msg'},[authErr]));
+  const submitBtn=mkBtn(authMode==='login'?'Sign In →':'Create Account →','btn btn-primary',()=>{authMode==='login'?doLogin():doRegister()});
+  submitBtn.style.width='100%';submitBtn.style.marginTop='0.5rem';
+  card.appendChild(submitBtn);
+  wrap.append(tabs,card);
+  return el('div',{class:'page'},[wrap]);
+}
+
+function renderCreate(){
+  const page=el('div',{class:'page fade-up'},[]);
+  const header=el('div',{class:'section-header'},[
+    el('h2',{class:'section-title'},['Create New Quiz']),
+    mkBtn('← Back','btn btn-ghost btn-sm',()=>{view='home';render()})
+  ]);
+  page.appendChild(header);
+  const card=el('div',{class:'card'},[]);
+
+  function inputField(label,key,type='text',placeholder=''){
+    const g=el('div',{class:'form-group'},[el('label',{},[label])]);
+    const inp=el('input',{type,placeholder});
+    inp.value=creationData[key]||'';
+    inp.addEventListener('input',e=>{creationData[key]=e.target.value;});
+    g.appendChild(inp);return g;
+  }
+  card.appendChild(inputField('Quiz Title *','title','text','e.g. Ultimate Science Challenge'));
+  
+  const catGroup=el('div',{class:'form-group'},[el('label',{},['Category'])]);
+  const sel=el('select');
+  sel.innerHTML=CATEGORIES.map(c=>`<option value="${c}">${c}</option>`).join('');
+  sel.value=creationData.category||'General';
+  sel.addEventListener('change',e=>{creationData.category=e.target.value;});
+  catGroup.appendChild(sel);card.appendChild(catGroup);
+
+  // Questions
+  const qSection=el('div',{style:'margin-top:1.2rem'},[]);
+  const qlabel=el('div',{style:'font-weight:800;font-size:1rem;color:var(--text);margin-bottom:1rem'},['Questions']);
+  qSection.appendChild(qlabel);
+
+  creationData.questions.forEach((q,qi)=>{
+    const block=el('div',{class:'question-block'},[]);
+    const qh=el('div',{class:'q-header'},[
+      el('span',{class:'q-label'},['Question '+(qi+1)]),
+    ]);
+    if(creationData.questions.length>1){
+      const rm=el('button',{class:'btn btn-ghost btn-sm',onClick:()=>{removeQuestion(qi)}},['✕ Remove']);
+      qh.appendChild(rm);
+    }
+    block.appendChild(qh);
+
+    const tg=el('div',{class:'form-group',style:'margin-bottom:0.8rem'},[]);
+    const tinp=el('input',{type:'text',placeholder:'Enter your question...'});
+    tinp.value=q.text;
+    tinp.addEventListener('input',e=>{creationData.questions[qi].text=e.target.value;});
+    tg.appendChild(tinp);block.appendChild(tg);
+
+    const og=el('div',{},[el('div',{style:'font-size:0.82rem;font-weight:700;color:var(--text-muted);margin-bottom:8px'},['Answer Options'])]);
+    const ogrid=el('div',{class:'options-grid'},[]);
+    q.options.forEach((opt,oi)=>{
+      const row=el('div',{class:'option-row'},[]);
+      const badge=el('div',{class:'option-letter'},[LETTERS[oi]]);
+      const inp=el('input',{type:'text',placeholder:'Option '+LETTERS[oi]});
+      inp.value=opt;
+      inp.addEventListener('input',e=>{creationData.questions[qi].options[oi]=e.target.value;});
+      row.append(badge,inp);ogrid.appendChild(row);
+    });
+    og.appendChild(ogrid);
+
+    const cs=el('div',{class:'correct-select'},[el('span',{},['✅ Correct answer:'])]);
+    const csel=el('select');
+    csel.innerHTML=LETTERS.map((l,i)=>`<option value="${i}">${l}</option>`).join('');
+    csel.value=q.correct;
+    csel.addEventListener('change',e=>{creationData.questions[qi].correct=parseInt(e.target.value);});
+    cs.appendChild(csel);og.appendChild(cs);
+    block.appendChild(og);
+    qSection.appendChild(block);
+  });
+
+  const addBtn=mkBtn('+ Add Question','btn btn-secondary',addQuestion);
+  addBtn.style.width='100%';addBtn.style.marginTop='0.5rem';
+  qSection.appendChild(addBtn);
+  card.appendChild(qSection);
+
+  if(creationErr)card.appendChild(el('p',{class:'error-msg',style:'margin-top:1rem'},[creationErr]));
+
+  const publishBtn=mkBtn('🚀 Publish Quiz','btn btn-primary btn-lg',saveQuiz);
+  publishBtn.style.width='100%';publishBtn.style.marginTop='1.5rem';
+  card.appendChild(publishBtn);
+  page.appendChild(card);
+  return page;
+}
+
+function renderList(){
+  const page=el('div',{class:'page fade-up'},[]);
+  const header=el('div',{class:'section-header'},[
+    el('h2',{class:'section-title'},['Browse Quizzes']),
+    currentUser?mkBtn('+ Create','btn btn-primary btn-sm',()=>{view='create';render()}):mkBtn('Sign In to Create','btn btn-secondary btn-sm',()=>{view='auth';authMode='login';render()})
+  ]);
+  page.appendChild(header);
+  if(quizzes.length===0){
+    const empty=el('div',{class:'empty-state'},[]);
+    empty.innerHTML=`<div class="empty-icon">📋</div><h3 style="font-weight:700;margin-bottom:0.5rem">No quizzes yet</h3><p>Be the first to create a quiz!</p>`;
+    page.appendChild(empty);
+  } else {
+    const grid=el('div',{class:'quiz-grid'},[]);
+    quizzes.slice().reverse().forEach(quiz=>grid.appendChild(renderQuizCard(quiz)));
+    page.appendChild(grid);
+  }
+  return page;
+}
+
+function renderTake(){
+  if(!quizSession)return el('div',{},[]);
+  const {quiz,current,selectedIdx,revealed}=quizSession;
+  const q=quiz.questions[current];
+  const total=quiz.questions.length;
+
+  const page=el('div',{class:'page fade-up'},[]);
+  const header=el('div',{class:'section-header'},[
+    el('h3',{style:'font-weight:700;font-size:1rem;color:var(--text-muted)'},[quiz.title]),
+    mkBtn('✕ Exit','btn btn-ghost btn-sm',()=>{view='list';quizSession=null;render()})
+  ]);
+  page.appendChild(header);
+
+  const card=el('div',{class:'card'},[]);
+
+  // Progress
+  const pw=el('div',{class:'progress-wrap'},[]);
+  pw.appendChild(el('div',{class:'progress-text'},[
+    el('span',{},['Question '+(current+1)+' of '+total]),
+    el('span',{},[quiz.category])
+  ]));
+  const pb=el('div',{class:'progress-bar'},[]);
+  const pf=el('div',{class:'progress-fill'});
+  pf.style.width=(((current+1)/total)*100)+'%';
+  pb.appendChild(pf);pw.appendChild(pb);
+  card.appendChild(pw);
+
+  card.appendChild(el('p',{class:'question-title'},[q.text]));
+
+  const opts=el('div',{class:'options-list'},[]);
+  q.options.forEach((opt,i)=>{
+    let cls='option-btn';
+    if(revealed){
+      if(i===q.correct)cls+=' correct';
+      else if(i===selectedIdx&&i!==q.correct)cls+=' wrong';
+    } else if(i===selectedIdx)cls+=' selected';
+    const btn=el('button',{class:cls,onClick:()=>selectAnswer(i)},[]);
+    const badge=el('div',{class:'opt-badge'},[LETTERS[i]]);
+    btn.append(badge,el('span',{},[opt]));
+    if(revealed)btn.disabled=true;
+    opts.appendChild(btn);
+  });
+  card.appendChild(opts);
+
+  if(revealed){
+    const isCorrect=selectedIdx===q.correct;
+    const fb=el('div',{class:'feedback-bar '+(isCorrect?'correct':'wrong')},[]);
+    fb.innerHTML=isCorrect?'✅ Correct! Well done!':'❌ Incorrect. The correct answer was <strong>'+LETTERS[q.correct]+'</strong>';
+    card.appendChild(fb);
+    const nav=el('div',{class:'quiz-nav'},[]);
+    const isLast=current===total-1;
+    nav.appendChild(mkBtn(isLast?'See Results 🏆':'Next Question →','btn btn-primary',nextQuestion));
+    card.appendChild(nav);
+  } else {
+    const nav=el('div',{class:'quiz-nav'},[]);
+    nav.appendChild(mkBtn('Confirm Answer','btn btn-primary',confirmAnswer,selectedIdx===undefined));
+    card.appendChild(nav);
+  }
+  page.appendChild(card);
+  return page;
+}
+
+function renderResults(){
+  if(!sessionResults)return el('div',{},[]);
+  const {quiz,answers,score,total}=sessionResults;
+  const pct=Math.round((score/total)*100);
+  const page=el('div',{class:'page fade-up'},[]);
+  const card=el('div',{class:'card'},[]);
+  
+  const circ=el('div',{class:'score-circle'},[]);
+  circ.innerHTML=`<div class="score-big">${pct}<span style="font-size:1.2rem">%</span></div><div class="score-label">${score}/${total} correct</div>`;
+  card.appendChild(circ);
+
+  const msg=pct>=80?'🏆 Outstanding!':pct>=60?'👍 Good job!':pct>=40?'📚 Keep practicing!':'💪 Never give up!';
+  card.appendChild(el('div',{class:'results-title'},[msg]));
+
+  const reviewLabel=el('div',{style:'font-weight:800;font-size:0.9rem;color:var(--text-muted);margin-bottom:1rem;text-transform:uppercase;letter-spacing:1px'},['Review']);
+  card.appendChild(reviewLabel);
+
+  quiz.questions.forEach((q,i)=>{
+    const correct=answers[i]===q.correct;
+    const ri=el('div',{class:'result-item '+(correct?'correct':'wrong')},[]);
+    ri.innerHTML=`<div class="result-q">${i+1}. ${q.text}</div>
+      <div class="result-ans">${correct?'✅':'❌'} Your answer: <strong>${LETTERS[answers[i]]} — ${q.options[answers[i]]||'No answer'}</strong>${!correct?` &nbsp;·&nbsp; Correct: <strong>${LETTERS[q.correct]} — ${q.options[q.correct]}</strong>`:''}</div>`;
+    card.appendChild(ri);
+  });
+
+  const btns=el('div',{style:'display:flex;gap:12px;flex-wrap:wrap;margin-top:1.5rem'},[
+    mkBtn('🔄 Try Again','btn btn-primary',()=>{startQuiz(quiz)}),
+    mkBtn('🎯 More Quizzes','btn btn-secondary',()=>{view='list';sessionResults=null;render()}),
+    mkBtn('🏠 Home','btn btn-ghost',()=>{view='home';sessionResults=null;render()}),
+  ]);
+  card.appendChild(btns);
+  page.appendChild(card);
+  return page;
+}
+
+function render(){
+  const app=document.getElementById('app');
+  app.innerHTML='';
+  app.appendChild(renderNav());
+
+  let content;
+  if(view==='home')content=renderHome();
+  else if(view==='auth')content=renderAuth();
+  else if(view==='create')content=renderCreate();
+  else if(view==='list')content=renderList();
+  else if(view==='take')content=renderTake();
+  else if(view==='results')content=renderResults();
+  app.appendChild(content);
+
+  if(toast){
+    const t=el('div',{class:'toast'},[toast]);
+    app.appendChild(t);
+  }
+}
+
+// Seed demo quizzes if empty
+if(quizzes.length===0){
+  quizzes=[
+    {id:1,title:'Classic Science Quiz',category:'Science',author:'QuizBot',authorId:0,
+     questions:[
+       {text:'What is the chemical symbol for water?',options:['H2O','CO2','NaCl','O2'],correct:0},
+       {text:'How many planets are in our Solar System?',options:['7','8','9','10'],correct:1},
+       {text:'What is the speed of light in km/s?',options:['150,000','300,000','450,000','600,000'],correct:1},
+     ],createdAt:'Jan 1, 2025'},
+    {id:2,title:'Tech Trivia Challenge',category:'Tech',author:'QuizBot',authorId:0,
+     questions:[
+       {text:'What does HTML stand for?',options:['HyperText Markup Language','High Transfer Mode Language','HyperTool Meta Language','None of these'],correct:0},
+       {text:'Which company created the JavaScript language?',options:['Microsoft','Apple','Netscape','Google'],correct:2},
+       {text:'What does CPU stand for?',options:['Central Processing Unit','Computer Power Unit','Core Processing Utility','Central Program Unit'],correct:0},
+     ],createdAt:'Feb 14, 2025'},
+  ];
+  save();
+}
+
+render();
+</script>
+</body>
+</html>
